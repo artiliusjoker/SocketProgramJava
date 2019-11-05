@@ -1,34 +1,41 @@
 package com.project.client;
 import java.io.*;
 import java.net.*;
+
 public class Client {
-    private static Socket clientSocket;
-    private static BufferedReader stdin;
-    private static PrintStream os;
-    //private static String fileDownloadName;
+
     public void connectMasterServer(String hostIP, int port) throws IOException {
+        Socket clientSocket = null;
         try {
-            clientSocket = new Socket(hostIP, port);
-            stdin = new BufferedReader(new InputStreamReader(System.in));
+           clientSocket = new Socket(hostIP, port);
         } catch (Exception e) {
             System.err.println("Cannot connect to the server, try again later.");
             System.exit(1);
         }
 
-        os = new PrintStream(clientSocket.getOutputStream());
+        PrintStream os = new PrintStream(clientSocket.getOutputStream());
         try {
             os.println("Client handshake");
-            receiveFileList("fileListForClient.txt");
+            //receiveFileList("fileListForClient.txt", clientSocket);
+            ReceiveFile.receiveFileList("fileListForClient.txt", clientSocket);
             os.println("dummy");
         } catch (Exception e) {
-            System.err.println("not valid input");
+            System.err.println("Cannot get file from master server, try again.");
         }
         finally {
-            stdin.close();
             os.close();
             clientSocket.close();
         }
     }
+
+    public void connectFileServer(String hostIP, int port) throws IOException{
+
+    }
+
+    public void downloadFile(String filename){
+
+    }
+
     public void readFileList(){
         try {
             File file = new File("fileListForClient.txt");
@@ -37,6 +44,7 @@ public class Client {
             while ((tempStr = bufferedReader.readLine()) != null){
                 System.out.println(tempStr);
             }
+            bufferedReader.close();
         }
         catch (FileNotFoundException e){
             System.exit(1);
@@ -47,15 +55,11 @@ public class Client {
             System.exit(1);
         }
     }
-    public void connectFileServer(String hostIP, int port) throws IOException{
 
-    }
-    private static void receiveFileList(String storedFile) throws IOException{
+    private static void receiveFileList(String storedFile, Socket clientSocket) throws IOException{
         try {
-            // create FileWriter objects to create BufferWriter objects for writing
-            // string to file
-            FileWriter fileToStore = new FileWriter(storedFile);
-            BufferedWriter writerToStoreFile = new BufferedWriter(fileToStore);
+            // Writer to store data to file fileListForClient.txt
+            BufferedWriter writerToStoreFile = new BufferedWriter(new FileWriter(storedFile));
             // Reader to read input stream from server ( server send list of files)
             BufferedReader masterServerInputStream = new
                     BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -66,6 +70,7 @@ public class Client {
                 writerToStoreFile.write(bufferStr + "\n");
             }
             writerToStoreFile.close();
+            masterServerInputStream.close();
         }
         catch (IOException e){
             System.out.println("Cannot get file list from server !!!");

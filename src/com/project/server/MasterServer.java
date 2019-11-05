@@ -1,7 +1,7 @@
 package com.project.server;
 import java.io.*;
 import java.net.*;
-
+import com.project.server.SendFile;
 public class MasterServer implements Server{
     private ServerSocket socketForListener;
 
@@ -22,6 +22,7 @@ public class MasterServer implements Server{
                 Runnable runnable = new HandleClients(socketForClients);
                 Thread newClients = new Thread(runnable);
                 newClients.start();
+                System.out.println("Serve successfully, waiting for new clients,...");
                 break;
             } catch (Exception e) {
                 System.err.println("Error in connection attempt.");
@@ -48,7 +49,7 @@ public class MasterServer implements Server{
                 while ((typeOfClient = clientInputStream.readLine()) != null){
                     if ("Client handshake".equals(typeOfClient)){
                         System.out.println("Handshake successfully with a client !");
-                        serveClient(socketForClients);
+                        SendFile.sendTextFile("fileList.txt", socketForClients);
                         stop();
                     }
                     else {
@@ -61,43 +62,6 @@ public class MasterServer implements Server{
             }
             catch (IOException ex){
                 System.exit(1);
-            }
-        }
-        private static void serveClient(Socket clientSoc)
-        {
-            final String fileName = "fileList.txt";
-            BufferedReader fileReader;
-            PrintWriter outStreamToClient = null;
-            try {
-                outStreamToClient = new PrintWriter(clientSoc.getOutputStream(), true);
-            }catch (IOException e){
-                System.out.println("Error in creating output stream to client !");
-            }
-            try {
-                // Class loader to use getResourceAsStream to read file
-                InputStream streamTemp = HandleClients.class.getClassLoader().getResourceAsStream(fileName);
-                System.out.println("Read stored file successfully !");
-
-                // input file stream
-                assert streamTemp != null;
-                fileReader = new BufferedReader(new InputStreamReader(streamTemp));
-
-                // read file and push to socket output stream to client
-                String strBuffer;
-                while((strBuffer = fileReader.readLine()) != null) {
-                    outStreamToClient.println(strBuffer);
-                }
-                outStreamToClient.println("end protocol");
-                streamTemp.close();
-            }
-            catch (AssertionError e){
-                System.out.println("Cannot find stored file !");
-            }
-            catch (IOException e){
-                System.out.println("Error in reading stored file !");
-            }
-            finally {
-                System.out.println("Serve client successfully !");
             }
         }
         private static void serveFileServer(){
