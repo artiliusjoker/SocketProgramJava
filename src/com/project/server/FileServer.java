@@ -6,7 +6,7 @@ import com.project.server.SendFile;
 
 public class FileServer implements Server{
     public void startServer(int initPort){
-
+        connectMasterServer("127.0.0.1", 34567);
     }
     public void stopServer() throws IOException {
 
@@ -25,7 +25,8 @@ public class FileServer implements Server{
             os.println("File handshake");
             SendFile.sendTextFile("newfile.txt", clientSocket);
             os.println("Goodbye");
-        } catch (Exception e) {
+            os.close();
+        } catch (IOException e) {
         System.err.println("Cannot send information to master server, try again.");
         }
     }

@@ -1,7 +1,7 @@
 package com.project.server;
 import java.io.*;
 import java.net.*;
-import com.project.server.SendFile;
+import com.project.client.ReceiveFile;
 public class MasterServer implements Server{
     private ServerSocket socketForListener;
 
@@ -17,13 +17,11 @@ public class MasterServer implements Server{
         while (true) {
             try {
                 Socket socketForClients = socketForListener.accept();
-                System.out.println("Accepted connection : " + socketForClients);
+                System.out.println("Accepted connection : " + socketForClients.getInetAddress().getHostAddress());
                 // multiple threads implements with Runnable and can server many clients
                 Runnable runnable = new HandleClients(socketForClients);
                 Thread newClients = new Thread(runnable);
                 newClients.start();
-                System.out.println("Serve successfully, waiting for new clients,...");
-                break;
             } catch (Exception e) {
                 System.err.println("Error in connection attempt.");
             }
@@ -36,39 +34,53 @@ public class MasterServer implements Server{
     // inner class for serving 2 types of clients and multiple clients with Runnable
     private static class HandleClients implements Runnable{
         private Socket socketForClients;
-        //private PrintWriter out;
-        private BufferedReader clientInputStream;
         private HandleClients(Socket socket){
             this.socketForClients = socket;
         }
+
         @Override
         public void run(){
             try {
-                clientInputStream = new BufferedReader(new InputStreamReader(socketForClients.getInputStream()));
+                BufferedReader clientInputStream = new BufferedReader(new InputStreamReader(socketForClients.getInputStream()));
                 String typeOfClient;
-                while ((typeOfClient = clientInputStream.readLine()) != null){
+                typeOfClient = clientInputStream.readLine();
+                if (typeOfClient != null){
                     if ("Client handshake".equals(typeOfClient)){
                         System.out.println("Handshake successfully with a client !");
                         SendFile.sendTextFile("fileList.txt", socketForClients);
-                        stop();
                     }
                     else {
                         System.out.println("Handshake successfully with a file server !");
                         serveFileServer();
-                        stop();
-                        break;
                     }
+                    System.out.println("Serve successfully, waiting for new clients,...");
+                    stop();
                 }
+                else throw new IOException("Cannot decide which type of clients");
             }
             catch (IOException ex){
+                System.err.println(ex.getMessage());
                 System.exit(1);
             }
         }
-        private static void serveFileServer(){
-
+        private void serveFileServer(){
+            try {
+                ReceiveFile.receiveFileList("fileList.txt", socketForClients, true);
+            }
+            catch (Exception e) {
+                System.out.println("Cannot get file list from file server !!!");
+                System.exit(1);
+            }
         }
-        private static void stop(){
-            //socketForClients.close();
+        private void stop(){
+            try{
+                if(socketForClients != null) socketForClients.close();
+            }
+            catch (IOException err)
+            {
+                System.out.println("Cannot close socket, fatal error !");
+                System.exit(1);
+            }
         }
     }
 }

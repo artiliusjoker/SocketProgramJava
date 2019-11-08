@@ -16,8 +16,8 @@ public class Client {
         PrintStream os = new PrintStream(clientSocket.getOutputStream());
         try {
             os.println("Client handshake");
-            //receiveFileList("fileListForClient.txt", clientSocket);
-            ReceiveFile.receiveFileList("fileListForClient.txt", clientSocket);
+            receiveFileList("fileListForClient.txt", clientSocket);
+            //ReceiveFile.receiveFileList("fileListForClient.txt", clientSocket);
             os.println("dummy");
         } catch (Exception e) {
             System.err.println("Cannot get file from master server, try again.");
