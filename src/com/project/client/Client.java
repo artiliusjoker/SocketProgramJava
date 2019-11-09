@@ -18,7 +18,7 @@ public class Client {
             os.println("Client handshake");
             receiveFileList("fileListForClient.txt", clientSocket);
             //ReceiveFile.receiveFileList("fileListForClient.txt", clientSocket);
-            os.println("dummy");
+            os.println("end");
         } catch (Exception e) {
             System.err.println("Cannot get file from master server, try again.");
         }
@@ -28,8 +28,46 @@ public class Client {
         }
     }
 
-    public void connectFileServer(String hostIP, int port) throws IOException{
+    public void connectFileServer(String hostIP, int port){
+        Socket clientSocket = null;
+        try {
+            clientSocket = new Socket(hostIP, port);
+        } catch (Exception e) {
+            System.err.println("Cannot connect to the server, try again later.");
+            System.exit(1);
+        }
+        try {
+            if (fileServerHandshake(clientSocket, "abc.txt"))
+            {
+                System.out.println("Success");
+            }
+        }
+        catch (IOException err)
+        {
+            System.out.println("Catch error in handshaking");
+            System.exit(1);
+        }
+    }
 
+    private static boolean fileServerHandshake(Socket socket, String fileName) throws IOException{
+        PrintStream outStream = new PrintStream(socket.getOutputStream());
+        BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        try {
+            String message;
+            outStream.println(fileName);
+            message = inStream.readLine();
+            if(message.equals("ready")) return true;
+            else throw new IOException("File server not ready !");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+        finally {
+            outStream.close();
+            inStream.close();
+            socket.close();
+        }
+        return false;
     }
 
     public void downloadFile(String filename){
