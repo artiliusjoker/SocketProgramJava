@@ -52,11 +52,12 @@ public class Client {
     private static boolean fileServerHandshake(Socket socket, String fileName) throws IOException{
         PrintStream outStream = new PrintStream(socket.getOutputStream());
         BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        boolean flag = false;
         try {
             String message;
             outStream.println(fileName);
             message = inStream.readLine();
-            if(message.equals("ready")) return true;
+            if(message.equals("ready")) flag = true;
             else throw new IOException("File server not ready !");
         } catch (IOException e) {
             System.err.println(e.getMessage());
@@ -67,7 +68,7 @@ public class Client {
             inStream.close();
             socket.close();
         }
-        return false;
+        return flag;
     }
 
     public void downloadFile(String filename){
