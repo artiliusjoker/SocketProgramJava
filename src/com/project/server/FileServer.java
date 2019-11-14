@@ -6,8 +6,8 @@ import java.net.Socket;
 
 public class FileServer implements Server{
     public void startServer(int initPort){
-        //connectMasterServer("127.0.0.1", 34567);
-        //System.out.println("Give Master server file list successfully");
+        connectMasterServer("127.0.0.1", 34567);
+        System.out.println("Give Master server file list successfully");
         ServerSocket socketListener = null;
         try {
             socketListener = new ServerSocket(initPort);
@@ -51,6 +51,14 @@ public class FileServer implements Server{
             os.close();
         } catch (IOException e) {
         System.err.println("Cannot send information to master server, try again.");
+        }
+        finally {
+            try{
+                clientSocket.close();
+            }
+            catch (IOException err){
+                System.err.println("cannot close socket to master server !");
+            }
         }
     }
 

@@ -13,16 +13,19 @@ public class ReceiveFile {
                     BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
             String bufferStr;
-            writerToStoreFile.write("\nHost server : " + clientSocket.getInetAddress().getHostAddress() + "\n");
+            String fileServerAddress = "\nHost server : " + clientSocket.getInetAddress().getHostAddress()
+                                + clientSocket.getPort() + "\n";
+            writerToStoreFile.write(fileServerAddress);
             while ((bufferStr = masterServerInputStream.readLine()) != null){
                 if("end protocol".equals(bufferStr)) break;
                 writerToStoreFile.write(bufferStr + "\n");
             }
             writerToStoreFile.close();
             masterServerInputStream.close();
+            clientSocket.close();
         }
         catch (IOException e){
-            System.out.println("Cannot get file list from server !!!");
+            System.out.println("Cannot get file list !!!");
             System.exit(1);
         }
         finally {
