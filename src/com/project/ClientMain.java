@@ -8,5 +8,6 @@ public class ClientMain {
         Client testClient = new Client();
         testClient.connectMasterServer("127.0.0.1", 34567);
         testClient.readFileList();
+        testClient.connectFileServer("127.0.0.1", 36000);
     }
 }

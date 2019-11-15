@@ -55,6 +55,7 @@ public class MasterServer implements Server{
                     }
                     System.out.println("Serve successfully, waiting for new clients,...");
                     stop();
+                    clientInputStream.close();
                 }
                 else throw new IOException("Cannot decide which type of clients");
             }
