@@ -1,8 +1,10 @@
 package com.project.server;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import com.project.protocols.udp.Sender;
 
 public class FileServer implements Server{
     public void startServer(int initPort){
@@ -72,15 +74,30 @@ public class FileServer implements Server{
         public void run(){
             // Handshaking and checking file exist part
             String fileName;
+            String readString;
+            String[] bufferSplit;
+            // Client info
+            int clientPort; // port for transfer files, not for handshake
+            InetAddress clientAddr;
+
             try {
+                clientAddr = handshakeSocket.getInetAddress();
+                // Handshake and get requested file name and client listening port
                 BufferedReader clientInputStream = new BufferedReader
                         (new InputStreamReader(handshakeSocket.getInputStream()));
                 PrintStream clientOutStream = new PrintStream(handshakeSocket.getOutputStream());
-                fileName = clientInputStream.readLine();
+                readString = clientInputStream.readLine();
+                bufferSplit = readString.split(" ", 2);
+                fileName = bufferSplit[0];
+                clientPort = Integer.parseInt(bufferSplit[1]);
+
+                // Check file exist
                 if (fileName != null){
                     if(checkFileExist(fileName))
                     {
                         clientOutStream.println("ready");
+                        System.out.println("Handshake and check file exist successfully" +
+                                            ", sending it for client,...");
                     }
                     else {
                         clientOutStream.println("sorry");
@@ -91,14 +108,15 @@ public class FileServer implements Server{
             }
             catch (IOException ex){
                 System.err.println(ex.getMessage());
-                System.exit(1);
             }
             finally {
-                stopHandshake();
-                System.out.println("Handshake and check file exist successfully, sending it for client,...");
+                // close handshaking socket
+                try {
+                    handshakeSocket.close();
+                }catch (IOException err){
+                    err.printStackTrace();
+                }
             }
-            // Sending file part
-            //sendFileToClients(fileName);
         }
 
         private static boolean checkFileExist(String fileName)
@@ -106,18 +124,10 @@ public class FileServer implements Server{
             File testOpen = new File(fileName);
             return testOpen.canRead();
         }
-        private void stopHandshake()
-        {
-            try{
-                if(handshakeSocket != null) handshakeSocket.close();
-            }
-            catch (IOException err)
-            {
-                System.out.println("Fatal error, can not close socket !");
-            }
-        }
+
         private static void sendFileToClients(String fileName){
 
         }
+
     }
 }

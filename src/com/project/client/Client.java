@@ -1,8 +1,12 @@
 package com.project.client;
 import java.io.*;
-import java.net.*;
+import java.net.DatagramSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import com.project.protocols.udp.Receiver;
 
 public class Client {
+    private final static int BASE_PORT = 30000;
 
     public void connectMasterServer(String hostIP, int port) throws IOException {
         Socket clientSocket = null;
@@ -29,6 +33,8 @@ public class Client {
     }
 
     public void connectFileServer(String hostIP, int port){
+        String fileName = "abc.txt";
+        // create TCP socket for handshaking
         Socket clientSocket = null;
         try {
             clientSocket = new Socket(hostIP, port);
@@ -36,11 +42,26 @@ public class Client {
             System.err.println("Cannot connect to the server, try again later.");
             System.exit(1);
         }
-        try {
-            if (fileServerHandshake(clientSocket, "abc.txt"))
-            {
-                System.out.println("Success");
+
+        // find port for receiving file (UDP)
+        int portListening = BASE_PORT;
+        DatagramSocket socket;
+        while(true) {
+            try {
+                socket = new DatagramSocket(portListening);
+                break;
+            } catch (SocketException e) {
+                portListening++;
             }
+        }
+
+        // handshaking in TCP
+        try {
+            if (fileServerHandshake(clientSocket, fileName, portListening))
+            {
+                System.out.println("Success handshaking !");
+            }
+            else socket.close();
         }
         catch (IOException err)
         {
@@ -49,19 +70,19 @@ public class Client {
         }
     }
 
-    private static boolean fileServerHandshake(Socket socket, String fileName) throws IOException{
+    private static boolean fileServerHandshake(Socket socket, String fileName, int portListening) throws IOException{
         PrintStream outStream = new PrintStream(socket.getOutputStream());
         BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         boolean flag = false;
         try {
             String message;
-            outStream.println(fileName);
+            String fileNameAndPort = fileName + " " + portListening;
+            outStream.println(fileNameAndPort);
             message = inStream.readLine();
             if(message.equals("ready")) flag = true;
             else throw new IOException("File server not ready !");
         } catch (IOException e) {
             System.err.println(e.getMessage());
-            System.exit(1);
         }
         finally {
             outStream.close();
@@ -69,10 +90,6 @@ public class Client {
             socket.close();
         }
         return flag;
-    }
-
-    public void downloadFile(String filename){
-
     }
 
     public void readFileList(){
