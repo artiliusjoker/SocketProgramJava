@@ -13,8 +13,8 @@ public class ReceiveFile {
                     BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
             String bufferStr;
-            String fileServerAddress = "\nHost server : " + clientSocket.getInetAddress().getHostAddress()
-                                + clientSocket.getPort() + "\n";
+            String fileServerAddress = String.format("\nHost server : %s\n"
+                    , clientSocket.getInetAddress().getHostAddress());
             writerToStoreFile.write(fileServerAddress);
             while ((bufferStr = masterServerInputStream.readLine()) != null){
                 if("end protocol".equals(bufferStr)) break;
