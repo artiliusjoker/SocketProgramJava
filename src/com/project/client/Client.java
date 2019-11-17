@@ -32,14 +32,14 @@ public class Client {
         }
     }
 
-    public void connectFileServer(String hostIP, int port){
+    public void connectFileServer(String hostIP, int port) throws IOException{
         String fileName = "abc.txt";
         // create TCP socket for handshaking
         Socket clientSocket = null;
         try {
             clientSocket = new Socket(hostIP, port);
         } catch (Exception e) {
-            System.err.println("Cannot connect to the server, try again later.");
+            System.err.println("Cannot connect to file server, try again later.");
             System.exit(1);
         }
 
@@ -60,13 +60,15 @@ public class Client {
             if (fileServerHandshake(clientSocket, fileName, portListening))
             {
                 System.out.println("Success handshaking !");
+                clientSocket.close();
             }
-            else socket.close();
+            else throw new IOException();
         }
         catch (IOException err)
         {
+            clientSocket.close();
             System.out.println("Catch error in handshaking");
-            System.exit(1);
+            throw new IOException("Cannot handshake");
         }
     }
 

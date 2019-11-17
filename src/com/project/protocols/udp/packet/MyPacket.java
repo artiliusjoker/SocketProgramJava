@@ -24,9 +24,9 @@ public class MyPacket{
         this.type = type;
         this.seqNum = sequenceNumber;
         this.packetData = data;
-        checkSum = -sequenceNumber;
+        this.checkSum = -sequenceNumber;
         for (byte b : data) {
-            checkSum -= b;
+            this.checkSum -= b;
         }
     }
 
@@ -38,7 +38,7 @@ public class MyPacket{
         this.seqNum = buffer.getInt();
         this.type = buffer.getInt();
         this.packetData = Arrays.copyOfRange(buffer.array(), Constant.PACKET_HEADER_SIZE, data.length);
-        if (this.type == Constant.META_DATA && seqNum == 0 && isValid()) {
+        if (this.type == Constant.META_DATA && this.seqNum == 0 && isValid()) {
             fileSize = buffer.getLong();
         }
     }
