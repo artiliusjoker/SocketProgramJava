@@ -2,6 +2,16 @@
 fileListForClient.txt
 fileList.txt
 
+# Test files extension
+.pdf
+.word
+.rar
+.zip
+.rar4
+.bin
+.iso
+
+
 # Manual Java ignore files
 # Compiled class file
 *.class

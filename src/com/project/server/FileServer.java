@@ -8,8 +8,8 @@ import com.project.protocols.udp.Sender;
 
 public class FileServer implements Server{
     public void startServer(int initPort){
-        connectMasterServer("127.0.0.1", 34567);
-        System.out.println("Give Master server file list successfully");
+        //connectMasterServer("127.0.0.1", 34567);
+        //System.out.println("Give Master server file list successfully");
         ServerSocket socketListener = null;
         try {
             socketListener = new ServerSocket(initPort);
@@ -86,6 +86,8 @@ public class FileServer implements Server{
                 BufferedReader clientInputStream = new BufferedReader
                         (new InputStreamReader(handshakeSocket.getInputStream()));
                 PrintStream clientOutStream = new PrintStream(handshakeSocket.getOutputStream());
+
+                // Take file name and client listening port
                 readString = clientInputStream.readLine();
                 bufferSplit = readString.split(" ", 2);
                 fileName = bufferSplit[0];
@@ -98,6 +100,9 @@ public class FileServer implements Server{
                         clientOutStream.println("ready");
                         System.out.println("Handshake and check file exist successfully" +
                                             ", sending it for client,...");
+                        // send the file
+                        Sender sender = new Sender(clientAddr.getHostAddress(), clientPort, fileName);
+                        sender.start();
                     }
                     else {
                         clientOutStream.println("sorry");
@@ -123,10 +128,6 @@ public class FileServer implements Server{
         {
             File testOpen = new File(fileName);
             return testOpen.canRead();
-        }
-
-        private static void sendFileToClients(String fileName){
-
         }
 
     }
