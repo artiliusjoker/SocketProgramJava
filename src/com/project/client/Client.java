@@ -33,7 +33,7 @@ public class Client {
     }
 
     public void connectFileServer(String hostIP, int port) throws IOException{
-        String fileName = "abc.txt";
+        String fileName = "x.docx";
         // create TCP socket for handshaking
         Socket clientSocket = null;
         try {
@@ -61,13 +61,17 @@ public class Client {
             {
                 System.out.println("Success handshaking !");
                 clientSocket.close();
+                // Begin receive file
+                Receiver receiver = new Receiver(socket);
+                receiver.start(fileName);
+                receiver.stop();
             }
-            else throw new IOException();
+            else throw new IOException("This server don't have that file");
         }
         catch (IOException err)
         {
             clientSocket.close();
-            System.out.println("Catch error in handshaking");
+            System.err.println(err.getMessage());
             throw new IOException("Cannot handshake");
         }
     }

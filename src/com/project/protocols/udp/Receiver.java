@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 
 public class Receiver {
     private SocketAddress sender;
@@ -99,5 +100,10 @@ public class Receiver {
         MyPacket ack = new MyPacket(sequenceNumber, new byte[0], Constant.ACK);
         DatagramPacket ackPacket = new DatagramPacket(ack.toBytes(), ack.length(), sender);
         clientSocket.send(ackPacket);
+    }
+
+    public void stop(){
+            if(clientSocket != null)
+                clientSocket.close();
     }
 }

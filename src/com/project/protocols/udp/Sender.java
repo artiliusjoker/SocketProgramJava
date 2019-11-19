@@ -61,6 +61,7 @@ public class Sender {
 
         // clean up
         socket.close();
+        inStream.close();
     }
 
     // send chunks of file
