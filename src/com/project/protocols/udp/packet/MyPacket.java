@@ -73,6 +73,10 @@ public class MyPacket{
         return packetData;
     }
 
+    public int getDataSize(){
+        return packetData.length;
+    }
+
     public long getFileSize(){
         return fileSize;
     }
