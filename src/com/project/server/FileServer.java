@@ -4,21 +4,35 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Objects;
+import java.net.SocketException;
+
+import com.project.protocols.Constant;
 import com.project.protocols.udp.Sender;
 
 public class FileServer implements Server{
     public void startServer(int initPort){
-        //connectMasterServer("127.0.0.1", 34567);
-        //System.out.println("Give Master server file list successfully");
-        ServerSocket socketListener = null;
-        try {
-            socketListener = new ServerSocket(initPort);
-            System.out.println("File server started listening successfully.");
-        }catch (IOException err)
-        {
-            System.err.println("Sorry there is an error in creating listener, please reboot server");
-            System.exit(1);
+        // connect and send files list to Master
+        connectMasterServer("127.0.0.1", 34567);
+        System.out.println("Give Master server file list successfully");
+
+        // find port for receiving file (UDP)
+        ServerSocket socketListener;
+        int portListening = initPort;
+        while(true) {
+            try {
+                socketListener = new ServerSocket(portListening);
+                break;
+            } catch (SocketException err) {
+                portListening++;
+            }
+            catch (IOException err){
+                System.err.println("Sorry there is an error in creating listener, please reboot server");
+                System.exit(1);
+            }
         }
+        System.out.println("File server started listening successfully on port : " + portListening);
+
         while (true)
         {
             try {
@@ -48,7 +62,7 @@ public class FileServer implements Server{
         try {
             PrintStream os = new PrintStream(clientSocket.getOutputStream());
             os.println("File handshake");
-            SendFile.sendTextFile("newfile.txt", clientSocket);
+            SendFile.sendTextFile("files.txt", clientSocket);
             os.println("Goodbye");
             os.close();
         } catch (IOException e) {
@@ -61,6 +75,25 @@ public class FileServer implements Server{
             catch (IOException err){
                 System.err.println("cannot close socket to master server !");
             }
+        }
+    }
+
+    public static void makeFileList() throws IOException{
+        BufferedWriter writer = new BufferedWriter(new FileWriter("files.txt"));
+        String currPath = System.getProperty("user.dir");
+        final File currDir = new File(currPath);
+        try{
+            for(final File file : Objects.requireNonNull(currDir.listFiles())){
+                String fileName = file.getName();
+                if(!fileName.equals("fileserver.jar") && !fileName.equals("files.txt")){
+                    writer.write(fileName);
+                    writer.newLine();
+                }
+            }
+            writer.close();
+        }
+        catch (IOException err){
+            throw new IOException("Cannot make file list, try again");
         }
     }
 

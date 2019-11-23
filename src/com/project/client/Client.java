@@ -32,8 +32,7 @@ public class Client {
         }
     }
 
-    public void connectFileServer(String hostIP, int port) throws IOException{
-        String fileName = "x.docx";
+    public void connectFileServer(String fileName, String hostIP, int port) throws IOException{
         // create TCP socket for handshaking
         Socket clientSocket = null;
         try {
