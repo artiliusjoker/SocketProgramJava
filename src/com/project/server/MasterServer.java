@@ -1,7 +1,12 @@
 package com.project.server;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+
 import com.project.client.ReceiveFile;
+import com.project.fileslist.FileList;
+import com.project.protocols.tcp.Tcp;
+
 public class MasterServer implements Server{
     private ServerSocket socketForListener;
 
@@ -47,7 +52,7 @@ public class MasterServer implements Server{
                 if (typeOfClient != null){
                     if ("Client handshake".equals(typeOfClient)){
                         System.out.println("Handshake successfully with a client !");
-                        SendFile.sendTextFile("fileList.txt", socketForClients);
+                        serveClient();
                     }
                     else {
                         System.out.println("Handshake successfully with a file server !");
@@ -73,6 +78,16 @@ public class MasterServer implements Server{
                 System.exit(1);
             }
         }
+
+        private void serveClient(){
+            try{
+                Tcp.sendFile("master.bin", socketForClients);
+            }
+            catch (IOException err){
+                err.printStackTrace();
+            }
+        }
+
         private void stop(){
             try{
                 if(socketForClients != null) socketForClients.close();

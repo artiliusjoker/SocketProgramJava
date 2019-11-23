@@ -4,6 +4,9 @@ import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import com.project.protocols.udp.Receiver;
+import com.project.protocols.tcp.Tcp;
+import com.project.fileslist.FileList;
+import java.util.ArrayList;
 
 public class Client {
     private final static int BASE_PORT = 30000;
@@ -20,8 +23,7 @@ public class Client {
         PrintStream os = new PrintStream(clientSocket.getOutputStream());
         try {
             os.println("Client handshake");
-            receiveFileList("fileListForClient.txt", clientSocket);
-            //ReceiveFile.receiveFileList("fileListForClient.txt", clientSocket);
+            Tcp.receiveFile("client.bin", clientSocket);
             os.println("end");
         } catch (Exception e) {
             System.err.println("Cannot get file from master server, try again.");
@@ -98,22 +100,11 @@ public class Client {
     }
 
     public void readFileList(){
-        try {
-            File file = new File("fileListForClient.txt");
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-            String tempStr;
-            while ((tempStr = bufferedReader.readLine()) != null){
-                System.out.println(tempStr);
-            }
-            bufferedReader.close();
+        try{
+            FileList.readFromFile("client.bin");
         }
-        catch (FileNotFoundException e){
-            System.exit(1);
-            System.out.println("File not found !!!");
-        }
-        catch (IOException e){
-            System.out.println("Fatal error, exiting... !!!");
-            System.exit(1);
+        catch (FileNotFoundException err){
+            err.printStackTrace();
         }
     }
 
