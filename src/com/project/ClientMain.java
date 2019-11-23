@@ -8,7 +8,11 @@ import java.io.InputStreamReader;
 
 public class ClientMain {
     public static void main(String[] args) throws IOException {
+        // Master server
         Client testClient = new Client();
+        testClient.connectMasterServer("127.0.0.1", 34567);
+        testClient.readFileList();
+
         BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
         // File and File master info input
         String fileName;
@@ -21,13 +25,10 @@ public class ClientMain {
         System.out.print("Input IP to download : ");
         ipAdrr = consoleInput.readLine();
 
-        System.out.print("Input port to download : ");
+        System.out.print("Input port to download (handshaking port) : ");
         port = Integer.parseInt(consoleInput.readLine());
 
-        // main methods
-        //testClient.connectMasterServer("127.0.0.1", 34567);
-        //testClient.readFileList();
+        // File server
         testClient.connectFileServer(fileName, ipAdrr, port);
-        System.out.println(System.getProperty("user.dir"));
     }
 }
