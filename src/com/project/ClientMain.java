@@ -10,7 +10,7 @@ public class ClientMain {
     public static void main(String[] args) throws IOException {
         // Master server
         Client testClient = new Client();
-        testClient.connectMasterServer("127.0.0.1", 34567);
+        testClient.connectMasterServer();
         testClient.readFileList();
 
         BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
