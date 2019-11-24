@@ -4,19 +4,15 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Objects;
 import java.net.SocketException;
+import java.util.Objects;
 
-//import com.project.protocols.Constant;
+import com.project.fileslist.FileList;
 import com.project.protocols.udp.Sender;
 
 public class FileServer implements Server{
     public void startServer(int initPort){
-        // connect and send files list to Master
-        connectMasterServer("127.0.0.1", 34567);
-        System.out.println("Give Master server file list successfully");
-
-        // find port for receiving file (UDP)
+        // find port for listening client handshake
         ServerSocket socketListener;
         int portListening = initPort;
         while(true) {
@@ -31,6 +27,10 @@ public class FileServer implements Server{
                 System.exit(1);
             }
         }
+
+        // connect and send files list to Master
+        connectMasterServer("127.0.0.1", 34567, portListening);
+        System.out.println("Give Master server file list successfully");
         System.out.println("File server started listening successfully on port : " + portListening);
 
         while (true)
@@ -47,13 +47,15 @@ public class FileServer implements Server{
             }
         }
     }
+
     public void stopServer() throws IOException {
 
     }
-    private static void connectMasterServer(String hostIP, int port){
+
+    private static void connectMasterServer(String hostIP, int masterPort, int listeningPort){
         Socket clientSocket = null;
         try {
-            clientSocket = new Socket(hostIP, port);
+            clientSocket = new Socket(hostIP, masterPort);
         } catch (Exception e) {
             System.err.println("Cannot connect to the server, try again later.");
             System.exit(1);
@@ -61,12 +63,14 @@ public class FileServer implements Server{
 
         try {
             PrintStream os = new PrintStream(clientSocket.getOutputStream());
-            os.println("File handshake");
-            SendFile.sendTextFile("files.txt", clientSocket);
-            os.println("Goodbye");
+            os.println("File_Server");
+            FileList sendList = makeFileList(clientSocket.getLocalAddress().getHostAddress(), listeningPort);
+            FileList.sendFileList(sendList, clientSocket);
+            sendList = null;
+            os.println("end");
             os.close();
         } catch (IOException e) {
-        System.err.println("Cannot send information to master server, try again.");
+            System.err.println("Cannot send information to master server, try again.");
         }
         finally {
             try{
@@ -78,23 +82,22 @@ public class FileServer implements Server{
         }
     }
 
-    public static void makeFileList() throws IOException{
-        BufferedWriter writer = new BufferedWriter(new FileWriter("files.txt"));
+    private static FileList makeFileList(String hostIp, int port) throws IOException{
+        FileList newList = new FileList(hostIp, port);
         String currPath = System.getProperty("user.dir");
         final File currDir = new File(currPath);
         try{
             for(final File file : Objects.requireNonNull(currDir.listFiles())){
                 String fileName = file.getName();
                 if(!fileName.equals("fileserver.jar") && !fileName.equals("files.txt")){
-                    writer.write(fileName);
-                    writer.newLine();
+                    newList.addFiles(fileName);
                 }
             }
-            writer.close();
         }
-        catch (IOException err){
+        catch (Exception err){
             throw new IOException("Cannot make file list, try again");
         }
+        return newList;
     }
 
     private static class FileHandleClients implements Runnable{

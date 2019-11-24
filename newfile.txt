@@ -1,6 +1,0 @@
-Listening on port : 36000
-abc0.pdf
-abc1.c
-abc2.java
-abc3.h
-abc4.x

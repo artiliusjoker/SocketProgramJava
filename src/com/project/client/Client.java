@@ -1,4 +1,5 @@
 package com.project.client;
+
 import java.io.*;
 import java.net.DatagramSocket;
 import java.net.Socket;
@@ -6,7 +7,6 @@ import java.net.SocketException;
 import com.project.protocols.udp.Receiver;
 import com.project.protocols.tcp.Tcp;
 import com.project.fileslist.FileList;
-import java.util.ArrayList;
 
 public class Client {
     private final static int BASE_PORT = 30000;
@@ -100,36 +100,13 @@ public class Client {
     }
 
     public void readFileList(){
+        System.out.println("Files available to download :");
         try{
-            FileList.readFromFile("client.bin");
+            FileList.showFileList("client.bin");
         }
-        catch (FileNotFoundException err){
+        catch (IOException err){
             err.printStackTrace();
         }
     }
 
-    private static void receiveFileList(String storedFile, Socket clientSocket) throws IOException{
-        try {
-            // Writer to store data to file fileListForClient.txt
-            BufferedWriter writerToStoreFile = new BufferedWriter(new FileWriter(storedFile));
-            // Reader to read input stream from server ( server send list of files)
-            BufferedReader masterServerInputStream = new
-                    BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-            String bufferStr;
-            while ((bufferStr = masterServerInputStream.readLine()) != null){
-                if("end protocol".equals(bufferStr)) break;
-                writerToStoreFile.write(bufferStr + "\n");
-            }
-            writerToStoreFile.close();
-            masterServerInputStream.close();
-        }
-        catch (IOException e){
-            System.out.println("Cannot get file list from server !!!");
-            System.exit(1);
-        }
-        finally {
-            System.out.println("Get list file successfully");
-        }
-    }
 }
