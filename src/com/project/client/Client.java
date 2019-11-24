@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
+
+import com.project.protocols.MyAddress;
 import com.project.protocols.udp.Receiver;
 import com.project.protocols.tcp.Tcp;
 import com.project.fileslist.FileList;
@@ -11,15 +13,21 @@ import com.project.fileslist.FileList;
 public class Client {
     private final static int BASE_PORT = 30000;
 
-    public void connectMasterServer(String hostIP, int port) throws IOException {
+    public void connectMasterServer() throws IOException {
+        // Input master info
+        MyAddress masterAddr = MyAddress.getUserInput();
+        if(masterAddr == null) throw new IOException("Cannot get input, please try again !");
+
+        // create socket with master server
         Socket clientSocket = null;
         try {
-           clientSocket = new Socket(hostIP, port);
+           clientSocket = new Socket(masterAddr.getAddress(), masterAddr.getPort());
         } catch (Exception e) {
             System.err.println("Cannot connect to the server, try again later.");
             System.exit(1);
         }
 
+        // Handshake with master server
         PrintStream os = new PrintStream(clientSocket.getOutputStream());
         try {
             os.println("Client handshake");
@@ -34,7 +42,22 @@ public class Client {
         }
     }
 
-    public void connectFileServer(String fileName, String hostIP, int port) throws IOException{
+    public void connectFileServer(String fileName) throws IOException{
+        // Get IP and port of File Server stored in file
+        String hostIP;
+        int port;
+        try{
+            MyAddress address = FileList.getAddress(fileName);
+            if(address == null) throw new IOException("Don't have that file !");
+            hostIP = address.getAddress();
+            port = address.getPort();
+            System.out.println(hostIP);
+            System.out.println(port);
+        }
+        catch (IOException err){
+            err.printStackTrace();
+            return;
+        }
         // create TCP socket for handshaking
         Socket clientSocket = null;
         try {
@@ -66,6 +89,7 @@ public class Client {
                 Receiver receiver = new Receiver(socket);
                 receiver.start(fileName);
                 receiver.stop();
+                System.out.println("Download successfully !");
             }
             else throw new IOException("This server don't have that file");
         }

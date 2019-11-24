@@ -10,13 +10,31 @@ public class MasterServer implements Server{
 
     @Override
     public void startServer(int initPort){
+        InetAddress inetAddress;
         try {
-            socketForListener = new ServerSocket(initPort);
-            System.out.println("Server started successfully.");
-        } catch (Exception e) {
-            System.err.println("Port already in use, please change to another port.");
-            System.exit(1);
+            inetAddress = InetAddress.getLocalHost();
         }
+        catch (UnknownHostException err){
+            System.err.println("Cannot get IP address !");
+            return;
+        }
+        // Get unused port
+        while (true){
+            try {
+                socketForListener = new ServerSocket(initPort);
+                System.out.println("Server started successfully.");
+                System.out.println("Please connect : " + inetAddress.getHostAddress() + " port : " + initPort);
+                break;
+            }
+            catch (SocketException err){
+                initPort++;
+            }
+            catch (IOException err){
+                System.err.println("Please reboot server !");
+                return;
+            }
+        }
+
         while (true) {
             try {
                 Socket socketForClients = socketForListener.accept();

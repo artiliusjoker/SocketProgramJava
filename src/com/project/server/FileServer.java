@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import com.project.fileslist.FileList;
 import com.project.protocols.udp.Sender;
+import com.project.protocols.MyAddress;
 
 public class FileServer implements Server{
     public void startServer(int initPort){
@@ -27,9 +28,19 @@ public class FileServer implements Server{
                 System.exit(1);
             }
         }
+        // Get user input for Master server info
+        MyAddress masterAdrress = null;
+        try {
+            masterAdrress = MyAddress.getUserInput();
+            if(masterAdrress == null) throw new IOException("Try again, cannot get input");
+        }
+        catch (IOException err){
+            err.printStackTrace();
+            return;
+        }
 
         // connect and send files list to Master
-        connectMasterServer("127.0.0.1", 34567, portListening);
+        connectMasterServer(masterAdrress.getAddress(), masterAdrress.getPort(), portListening);
         System.out.println("Give Master server file list successfully");
         System.out.println("File server started listening successfully on port : " + portListening);
 
@@ -139,6 +150,7 @@ public class FileServer implements Server{
                         // send the file
                         Sender sender = new Sender(clientAddr.getHostAddress(), clientPort, fileName);
                         sender.start();
+                        System.out.println("Send successfully !");
                     }
                     else {
                         clientOutStream.println("sorry");
