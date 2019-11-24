@@ -1,7 +1,10 @@
 package com.project.server;
 import java.io.*;
 import java.net.*;
-import com.project.client.ReceiveFile;
+
+import com.project.fileslist.FileList;
+import com.project.protocols.tcp.Tcp;
+
 public class MasterServer implements Server{
     private ServerSocket socketForListener;
 
@@ -44,14 +47,17 @@ public class MasterServer implements Server{
                 BufferedReader clientInputStream = new BufferedReader(new InputStreamReader(socketForClients.getInputStream()));
                 String typeOfClient;
                 typeOfClient = clientInputStream.readLine();
+
                 if (typeOfClient != null){
                     if ("Client handshake".equals(typeOfClient)){
                         System.out.println("Handshake successfully with a client !");
-                        SendFile.sendTextFile("fileList.txt", socketForClients);
+                        serveClient();
                     }
                     else {
+                        if(!"end".equals(typeOfClient)){
                         System.out.println("Handshake successfully with a file server !");
                         serveFileServer();
+                        }
                     }
                     System.out.println("Serve successfully, waiting for new clients,...");
                     stop();
@@ -59,20 +65,35 @@ public class MasterServer implements Server{
                 }
                 else throw new IOException("Cannot decide which type of clients");
             }
-            catch (IOException ex){
-                System.err.println(ex.getMessage());
+            catch (IOException err){
+                System.err.println(err.getMessage());
                 System.exit(1);
             }
         }
+
         private void serveFileServer(){
             try {
-                ReceiveFile.receiveFileList("fileList.txt", socketForClients, true);
+                FileList newList = FileList.receiveFileList(socketForClients);
+                if(newList == null) throw new IOException("Fatal, cannot get list of files !");
+                FileList.updateFileList(newList);
+                System.out.println("Get file list from file server done !");
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 System.out.println("Cannot get file list from file server !!!");
+                e.printStackTrace();
                 System.exit(1);
             }
         }
+
+        private void serveClient(){
+            try{
+                Tcp.sendFile("master.bin", socketForClients);
+            }
+            catch (IOException err){
+                err.printStackTrace();
+            }
+        }
+
         private void stop(){
             try{
                 if(socketForClients != null) socketForClients.close();
