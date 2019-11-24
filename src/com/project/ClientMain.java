@@ -16,19 +16,11 @@ public class ClientMain {
         BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
         // File and File master info input
         String fileName;
-        String ipAdrr;
-        int port;
 
         System.out.print("Input file name to download : ");
         fileName = consoleInput.readLine();
 
-        System.out.print("Input IP to download : ");
-        ipAdrr = consoleInput.readLine();
-
-        System.out.print("Input port to download (handshaking port) : ");
-        port = Integer.parseInt(consoleInput.readLine());
-
         // File server
-        testClient.connectFileServer(fileName, ipAdrr, port);
+        testClient.connectFileServer(fileName);
     }
 }

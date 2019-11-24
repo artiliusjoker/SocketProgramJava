@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
+
+import com.project.protocols.MyAddress;
 import com.project.protocols.udp.Receiver;
 import com.project.protocols.tcp.Tcp;
 import com.project.fileslist.FileList;
@@ -34,7 +36,21 @@ public class Client {
         }
     }
 
-    public void connectFileServer(String fileName, String hostIP, int port) throws IOException{
+    public void connectFileServer(String fileName) throws IOException{
+        // Get IP and port of File Server stored in file
+        String hostIP;
+        int port;
+        try{
+            MyAddress address = FileList.getAddress(fileName);
+            hostIP = address.getAddress();
+            port = address.getPort();
+            System.out.println(hostIP);
+            System.out.println(port);
+        }
+        catch (IOException err){
+            err.printStackTrace();
+            return;
+        }
         // create TCP socket for handshaking
         Socket clientSocket = null;
         try {

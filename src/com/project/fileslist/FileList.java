@@ -3,11 +3,24 @@ package com.project.fileslist;
 import java.io.*;
 import java.util.ArrayList;
 import java.net.Socket;
+import com.project.protocols.MyAddress;
 
 public class FileList implements Serializable{
     private String host;
     private int port;
     private ArrayList<String> fileNames;
+
+    private ArrayList<String> getFileNames() {
+        return fileNames;
+    }
+
+    private int getPort() {
+        return port;
+    }
+
+    private String getHost() {
+        return host;
+    }
 
     public FileList(String host, int port) {
         this.host = host;
@@ -134,5 +147,29 @@ public class FileList implements Serializable{
             return null;
         }
         return fileList;
+    }
+
+    public static MyAddress getAddress(String fileName) throws IOException{
+        MyAddress address = null;
+        ArrayList<FileList> fileLists = null;
+        ArrayList<String> buffer = null;
+        try{
+            fileLists = FileList.readFromFile("client.bin");
+        }
+        catch (FileNotFoundException err){
+            err.printStackTrace();
+            return null;
+        }
+
+        if(fileLists == null) throw new IOException("Cannot read file list !");
+        for(FileList fileList : fileLists) {
+            buffer = fileList.getFileNames();
+            if(buffer.indexOf(fileName) != -1){
+                address = new MyAddress(fileList.getHost(), fileList.getPort());
+                break;
+            }
+        }
+        fileLists = null;
+        return address;
     }
 }
