@@ -27,9 +27,23 @@ public class FileServer implements Server{
                 System.exit(1);
             }
         }
+        // Get user input for Master server info
+        BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
+        String masterIp;
+        int masterPort;
+        try {
+            System.out.print("Input master server IP address : ");
+            masterIp = consoleInput.readLine();
+            System.out.print("Input master server port : ");
+            masterPort = Integer.parseInt(consoleInput.readLine());
+        }
+        catch (IOException err){
+            err.printStackTrace();
+            return;
+        }
 
         // connect and send files list to Master
-        connectMasterServer("127.0.0.1", 34567, portListening);
+        connectMasterServer(masterIp, masterPort, portListening);
         System.out.println("Give Master server file list successfully");
         System.out.println("File server started listening successfully on port : " + portListening);
 
@@ -139,6 +153,7 @@ public class FileServer implements Server{
                         // send the file
                         Sender sender = new Sender(clientAddr.getHostAddress(), clientPort, fileName);
                         sender.start();
+                        System.out.println("Send successfully !");
                     }
                     else {
                         clientOutStream.println("sorry");
