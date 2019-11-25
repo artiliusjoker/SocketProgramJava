@@ -13,14 +13,7 @@ public class ClientMain {
         testClient.connectMasterServer();
         testClient.readFileList();
 
-        BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
-        // File and File master info input
-        String fileName;
-
-        System.out.print("Input file name to download : ");
-        fileName = consoleInput.readLine();
-
         // File server
-        testClient.connectFileServer(fileName);
+        testClient.downloadFile();
     }
 }
