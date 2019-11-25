@@ -8,19 +8,8 @@ import java.io.InputStreamReader;
 
 public class ClientMain {
     public static void main(String[] args) throws IOException {
-        // Master server
-        Client testClient = new Client();
-        testClient.connectMasterServer();
-        testClient.readFileList();
-
-        BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
-        // File and File master info input
-        String fileName;
-
-        System.out.print("Input file name to download : ");
-        fileName = consoleInput.readLine();
-
-        // File server
-        testClient.connectFileServer(fileName);
+        // start client
+        Client client = new Client();
+        client.start();
     }
 }
