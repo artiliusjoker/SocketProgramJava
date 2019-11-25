@@ -13,7 +13,7 @@ import com.project.fileslist.FileList;
 public class Client {
     private final static int BASE_PORT = 30000;
 
-    public void connectMasterServer() throws IOException {
+    private void connectMasterServer() throws IOException {
         // Input master info
         MyAddress masterAddr = MyAddress.getUserInput();
         if(masterAddr == null) throw new IOException("Cannot get input, please try again !");
@@ -42,7 +42,7 @@ public class Client {
         }
     }
 
-    public void readFileList(){
+    private static void readFileList(){
         System.out.println("Files available to download :");
         try{
             FileList.showFileList("client.bin");
@@ -52,17 +52,42 @@ public class Client {
         }
     }
 
-    public void downloadFile() throws IOException{
+    public void start() throws IOException{
         BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
+        // Initialize, get info from master server
+        try {
+            connectMasterServer();
+            readFileList();
+        }
+        catch (IOException err){
+            err.printStackTrace();
+            return;
+        }
+
         while (true){
-            // File name to download
-            //BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
+            // Get user input
             String fileName;
-            System.out.print("Input file name to download, input 'stop' to end program : ");
+            System.out.print("Input file name to download, " +
+                            "input 'stop' to end program, " +
+                            "input 'update' to get new files list : ");
             fileName = consoleInput.readLine();
+            // End condition
             if(fileName.equals("stop")){
                 System.out.println("Good bye");
                 break;
+            }
+            // Get new files list
+            if(fileName.equals("update")){
+                System.out.println("Input master server address again :");
+                try {
+                    connectMasterServer();
+                    readFileList();
+                }
+                catch (IOException err){
+                    err.printStackTrace();
+                    return;
+                }
+                continue;
             }
             System.out.flush();
 

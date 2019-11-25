@@ -8,12 +8,8 @@ import java.io.InputStreamReader;
 
 public class ClientMain {
     public static void main(String[] args) throws IOException {
-        // Master server
-        Client testClient = new Client();
-        testClient.connectMasterServer();
-        testClient.readFileList();
-
-        // File server
-        testClient.downloadFile();
+        // start client
+        Client client = new Client();
+        client.start();
     }
 }
