@@ -72,9 +72,11 @@ public class MasterServer implements Server{
                         serveClient();
                     }
                     else {
-                        if(!"end".equals(typeOfClient)){
-                        System.out.println("Handshake successfully with a file server !");
-                        serveFileServer();
+                        synchronized (this){
+                            if(!"end".equals(typeOfClient)){
+                                System.out.println("Handshake successfully with a file server !");
+                                this.serveFileServer();
+                            }
                         }
                     }
                     System.out.println("Serve successfully, waiting for new clients,...");
